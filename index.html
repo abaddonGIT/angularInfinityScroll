@@ -15,9 +15,10 @@
             <li ng-repeat="item in items track by $index">
                 <b>{{item.pagetitle}}</b>
                 <b>{{item.id}}</b>
-                <div data-scroll-parse="item.introtext"></div>
+                <span data-scroll-parse="item.introtext"></span>
             </li>
         </ul>
+        <!--<button ng-click="getMore()" ng-init="accept = true" ng-show="accept">Еще</button>-->
         <div data-scroll-loader></div>
     </div>
 

@@ -33,16 +33,17 @@ scroll.directive("scrollLoader", [function () {
  * Интерпритирует теги и выражение angular-ра
  */
 scroll.directive("scrollParse", ['$sce', '$compile', function ($sce, $compile) {
+    var content = null;
     return {
         compile: function compile(tElement, tAttrs, transclude) {
             return {
                 pre: function preLink(scope, elem, attr) {
                     var html = scope.$eval(attr.scrollParse);
-                    elem.append('<div>' + html + '</div>');
+                    content = angular.element('<div></div>').append(html).contents();
                 },
                 post: function postLink(scope, elem, attr) {
-                    var html = elem.contents();
-                    $compile(html)(scope);
+                    elem.append(content);
+                    $compile(content)(scope);
                 }
             };
         }
@@ -68,7 +69,7 @@ scroll.factory("$infScroll", ['$rootScope', '$window', '$document', '$http', '$c
         scrollTop = 0,
         offset = 0,
         accept = true,
-        dH = $document[0].documentElement.clientHeight,//Высота видимой части
+        dH = 0,
         wH = 0;
 
     var Scroll = function (options) {
@@ -78,6 +79,7 @@ scroll.factory("$infScroll", ['$rootScope', '$window', '$document', '$http', '$c
         //Настройки
         angular.extend(this, {
             external: true,
+            button: false,
             url: null,
             gifPath: null,
             indentToScroll: 200,
@@ -100,10 +102,18 @@ scroll.factory("$infScroll", ['$rootScope', '$window', '$document', '$http', '$c
             this.locScope[this.alias] = [];
 
             if (!this.template) {
-                this.regScrollEvent();
+                if (!this.button) {
+                    this.regScrollEvent();
+                } else {
+                    this.getTheData();
+                }
             } else {
                 this.loadTemplate(function () {
-                    this.regScrollEvent();
+                    if (!this.button) {
+                        this.regScrollEvent();
+                    } else {
+                        this.getTheData();
+                    }
                 }.bind(this));
             }
         }.bind(this));
@@ -172,38 +182,54 @@ scroll.factory("$infScroll", ['$rootScope', '$window', '$document', '$http', '$c
             return requestString.join("&");
         },
         regScrollEvent: function () {
-            if (this.external) {//Относительно окна
-                W.bind('scroll', function (e) {
-                    scrollTop = $window.pageYOffset || $document[0].documentElement.scrollTop;
-                    wH = Math.max($document[0].documentElement.scrollHeight, dH);//Длина с учетом подгруженных элементов
-
-                    if (scrollTop + this.indentToScroll >= wH - dH && accept) {
-                        //Новая порция
-                        this.getTheData();
-                    }
-
-                }.bind(this));
-            } else {//Относительно блока
-
+            var win = null, doc = null;
+            if (this.external) {
+                win = W;
+                doc = $document[0].documentElement;
+                dH = doc.clientHeight;
+            } else {
+                dH = this.elem[0].clientHeight;
+                win = this.elem;
+                doc = this.elem[0];
             }
+            win.unbind('scroll');
+            win.bind('scroll', function (e) {
+                scrollTop = win[0].pageYOffset || doc.scrollTop;
+                wH = Math.max(doc.scrollHeight, dH);//Длина с учетом подгруженных элементов
+
+                if (scrollTop + this.indentToScroll >= wH - dH && accept) {
+                    //Новая порция
+                    this.getTheData();
+                }
+
+            }.bind(this));
             this.getTheData();
         },
         prepareResult: function (data) {
-            if (data instanceof Array) {
-                var ln = data.length, i = 0;
-                do {
-                    this.locScope[this.alias].push(data[i]);
-                    i++;
-                } while (i < ln);
-                if (ln < this.limit) {
-                    accept = false;
+            switch (this.responseType) {
+                case 'json':
+                    if (data instanceof Array) {
+                        var ln = data.length, i = 0;
+                        do {
+                            this.locScope[this.alias].push(data[i]);
+                            i++;
+                        } while (i < ln);
+                        if (ln < this.limit) {
+                            accept = false;
+                        }
+                    } else {
+                        this.locScope[this.alias].push(data);
+                        if (data.length < this.limit) {
+                            accept = false;
+                        }
+                    }
+                    break;
+                case 'html':
+                    var content = angular.element('<div></div>').append(data).contents();
+                    this.elem.append(content)
+                    $compile(content)(this.locScope);
+                    break;
                 }
-            } else {
-                this.locScope[this.alias].push(data);
-                if (data.length < this.limit) {
-                    accept = false;
-                }
-            }
         },
         /*
          * Делает запрос на получение очередной порции данных
@@ -228,14 +254,21 @@ scroll.factory("$infScroll", ['$rootScope', '$window', '$document', '$http', '$c
                     this.prepareResult(data);
                     scope.showLoader = false;
                     offset += this.limit;
-                    this.trigger("afterScroll", this, data, status);
+                    this.trigger("afterScroll", this, data, status, accept);
                 }.bind(this)).error(function (data, status) {
                 this.trigger("scrollError", data, status);
             });
         },
         reset: function () {
+            switch (this.responseType) {
+                case 'json':
+                    this.locScope[this.alias] = [];
+                    break;
+                case 'html':
+                    this.elem.html('');
+                    break;
+            }
             offset = 0;
-            this.locScope[this.alias] = [];
             this.getTheData();
         },
         //Дополнительные данные для запроса
@@ -246,6 +279,8 @@ scroll.factory("$infScroll", ['$rootScope', '$window', '$document', '$http', '$c
         init: function (options) {
             return Scroll(options);
         },
-        reset: this.reset
+        scroll: accept,
+        reset: this.reset,
+        getTheData: this.getTheData
     }
 }]);

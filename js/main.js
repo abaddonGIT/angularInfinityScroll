@@ -16,6 +16,10 @@ app.controller("baseController", ['$scope', '$infScroll', function($scope, $infS
         };
     };
 
+    $scope.getMore = function () {
+        scroll.getTheData();
+    };
+
     $scope.resetScroll = function () {
         scroll.reset();
     }
@@ -30,7 +34,7 @@ app.controller("baseController", ['$scope', '$infScroll', function($scope, $infS
         //console.log(ob);
     });
 
-    scroll.bind("afterScroll", function (e, ob, data, status){
-        //console.log(data);
+    scroll.bind("afterScroll", function (e, ob, data, status, accept){
+        $scope.accept = accept;
     }); 
 }]);
