@@ -7,7 +7,8 @@ app.controller("baseController", ['$scope', '$infScroll', function($scope, $infS
         url: "http://totpp.demosite.pro/slu/test.html",
         limit: 50,
         gifPath: "../loading.gif",
-        alias: "items"
+        alias: "items",
+        heightWatch: 500
     });
 
     $scope.changeData = function () {
@@ -27,7 +28,7 @@ app.controller("baseController", ['$scope', '$infScroll', function($scope, $infS
     scroll.data = {
         test: "Hello Mickle!",
         test2: "like",
-        action: {m: "test" ,p: "test2"},
+        action: {m: "test" ,p: "test2"}
     };
 
     scroll.bind("beforeScroll", function (e, ob) {
@@ -36,5 +37,13 @@ app.controller("baseController", ['$scope', '$infScroll', function($scope, $infS
 
     scroll.bind("afterScroll", function (e, ob, data, status, accept){
         $scope.accept = accept;
-    }); 
+    });
+
+    scroll.bind("after:deadline", function () {
+       console.log("big");
+    });
+
+    scroll.bind("prev:deadline", function () {
+        console.log("small");
+    });
 }]);
