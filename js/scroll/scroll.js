@@ -92,7 +92,9 @@ scroll.factory("$infScroll", ['$rootScope', '$window', '$document', '$http', '$c
             headers: null,
             alias: 'results',
             responseType: "json",
-            heightWatch: null
+            heightWatch: null,
+            accept: true,
+            userControl: false
         }, options);
 
         limit = this.limit;
@@ -197,7 +199,7 @@ scroll.factory("$infScroll", ['$rootScope', '$window', '$document', '$http', '$c
                 scrollTop = win[0].pageYOffset || doc.scrollTop;
                 wH = Math.max(doc.scrollHeight, dH);//Длина с учетом подгруженных элементов
 
-                if (scrollTop + this.indentToScroll >= wH - dH && accept) {
+                if (scrollTop + this.indentToScroll >= wH - dH && this.accept) {
                     //Новая порция
                     this.getTheData();
                 }
@@ -229,12 +231,16 @@ scroll.factory("$infScroll", ['$rootScope', '$window', '$document', '$http', '$c
                             i++;
                         } while (i < ln);
                         if (ln < this.limit) {
-                            accept = false;
+                            this.accept = false;
+                        } else {
+                            this.accept = true;
                         }
                     } else {
                         this.locScope[this.alias].push(data);
                         if (data.length < this.limit) {
-                            accept = false;
+                            this.accept = false;
+                        } else {
+                            this.accept = true;
                         }
                     }
                     break;
@@ -242,6 +248,7 @@ scroll.factory("$infScroll", ['$rootScope', '$window', '$document', '$http', '$c
                     var content = angular.element('<div></div>').append(data).contents();
                     this.elem.append(content)
                     $compile(content)(this.locScope);
+                    this.accept = true;
                     break;
                 }
         },
@@ -249,7 +256,7 @@ scroll.factory("$infScroll", ['$rootScope', '$window', '$document', '$http', '$c
          * Делает запрос на получение очередной порции данных
          */
         getTheData: function () {
-            accept = false;
+            this.accept = false;
             var scope = this.locScope;
             //Показываем preloder
             scope.showLoader = true;
@@ -264,8 +271,11 @@ scroll.factory("$infScroll", ['$rootScope', '$window', '$document', '$http', '$c
                     return 'limit=' + limit + '&offset=' + offset + '&' + this.toParam(data);
                 }.bind(this)
             }).success(function (data, status) {
-                    accept = true;//Разрешаем скролл
-                    this.prepareResult(data);
+                    if (!this.userControl) {
+                        this.prepareResult(data);
+                    } else {
+                        this.trigger("userDataScrollControl", data);
+                    }
                     scope.showLoader = false;
                     offset += this.limit;
                     this.trigger("afterScroll", this, data, status, accept);
