@@ -27,7 +27,7 @@ app.controller("baseController", ['$scope', '$infScroll', function($scope, $infS
     scroll.data = {
         test: "Hello Mickle!",
         test2: "like",
-        action: {m: "test" ,p: "test2"},
+        action: {m: "test" ,p: "test2"}
     };
 
     scroll.bind("beforeScroll", function (e, ob) {
