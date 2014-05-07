@@ -91,7 +91,8 @@ scroll.factory("$infScroll", ['$rootScope', '$window', '$document', '$http', '$c
             method: "post",
             headers: null,
             alias: 'results',
-            responseType: "json"
+            responseType: "json",
+            heightWatch: null
         }, options);
 
         limit = this.limit;
@@ -155,7 +156,6 @@ scroll.factory("$infScroll", ['$rootScope', '$window', '$document', '$http', '$c
         //Преобразует объект, массив или массив объектов в строку для запроса
         toParam: function (data, prefix) {
             var requestString = [], value = null, i = 0, prefix = prefix || 0;
-            // requestString.push('limit=' + limit + '&offset=' + offset);
             if (angular.isArray(data)) {//если массив
                 var ln = data.length;
                 do {
@@ -182,7 +182,7 @@ scroll.factory("$infScroll", ['$rootScope', '$window', '$document', '$http', '$c
             return requestString.join("&");
         },
         regScrollEvent: function () {
-            var win = null, doc = null;
+            var win = null, doc = null, big = false, small = true;
             if (this.external) {
                 win = W;
                 doc = $document[0].documentElement;
@@ -200,6 +200,20 @@ scroll.factory("$infScroll", ['$rootScope', '$window', '$document', '$http', '$c
                 if (scrollTop + this.indentToScroll >= wH - dH && accept) {
                     //Новая порция
                     this.getTheData();
+                }
+
+                if (this.heightWatch) {
+                    if (scrollTop > this.heightWatch && !big) {
+                        this.trigger('after:deadline');
+                        big = true;
+                        small = false;
+                    }
+
+                    if (scrollTop < this.heightWatch && !small) {
+                        this.trigger('prev:deadline');
+                        big = false;
+                        small = true;
+                    }
                 }
 
             }.bind(this));
