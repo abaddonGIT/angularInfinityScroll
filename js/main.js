@@ -11,8 +11,9 @@ app.controller("baseController", ['$scope', '$infScroll','$http','$rootScope', f
             gifPath: "../loading.gif",
             alias: "items",
             heightWatch: 500,
-            userControl: true,
-            locScope: $scope
+            userControll: false,
+            locScope: $scope,
+            method: 'get'
         });
 
         //$scope.scrollStart = true;
@@ -33,8 +34,7 @@ app.controller("baseController", ['$scope', '$infScroll','$http','$rootScope', f
 
         scroll.data = {
             test: "Hello Mickle!",
-            test2: "like",
-            action: {m: "test" ,p: "test2"}
+            test2: "like"
         };
 
 

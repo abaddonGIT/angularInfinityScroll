@@ -33,6 +33,12 @@ angularInfinityScroll
             <li>
                 <b>responseType</b> - тип вывода полученных данных (json или html)
             </li>
+            <li>
+                <b>userControll</b> - если стоит true, то пользователь сам будет управлять выводом через событие <b>userDataScrollControl</b>, в котором доступен результат запроса
+            <li>
+            <li>
+                <b>locScope</b> - текущий scope
+            </li>
         </ul>
     </li>
     <li>
@@ -102,6 +108,10 @@ scroll.bind("after:deadline", function () {
 //После возвращения
 scroll.bind("prev:deadline", function () {
     console.log("small");
+});
+//При пользовательском управлении выводом
+scroll.bind("userDataScrollControl", function (e, data, status) {
+    console.log(data);
 });
 </pre>
     </li>

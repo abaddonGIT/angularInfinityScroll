@@ -100,7 +100,7 @@ scroll.factory("$infScroll", ['$rootScope', '$window', '$document', '$http', '$c
             responseType: "json",
             heightWatch: null,
             accept: true,
-            userControl: false,
+            userControll: false,
             locScope: null
         }, options);
 
@@ -268,28 +268,43 @@ scroll.factory("$infScroll", ['$rootScope', '$window', '$document', '$http', '$c
          */
         getTheData: function () {
             this.accept = false;
-            var scope = this.locScope;
+            var scope = this.locScope, method = this.method.toUpperCase(),
+                settings = {
+                    method: this.method,
+                    url: this.url,
+                    headers: this.headers || {'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8'},
+                    responseType: this.responseType
+                }, dop = {};
             //Показываем preloder
             scope.showLoader = true;
-            this.trigger("beforeScroll", this);
-            $http({
-                method: this.method,
-                url: this.url,
-                data: this.data,
-                headers: this.headers || {'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8'},
-                responseType: this.responseType,
-                transformRequest: function (data) {
-                    return 'limit=' + limit + '&offset=' + offset + '&' + this.toParam(data);
-                }.bind(this)
-            }).success(function (data, status) {
-                    if (!this.userControl) {
+            this.trigger("beforeScroll");
+            switch (method) {
+                case 'POST':
+                    dop = {
+                        data: this.data,
+                        transformRequest: function (data) {
+                            return 'limit=' + limit + '&offset=' + offset + '&' + this.toParam(data);
+                        }.bind(this)
+                    };
+                    break;
+                case 'GET':
+                    this.data.limit = limit;
+                    this.data.offset = offset;
+                    dop = {
+                        params: this.data
+                    };
+                    break;
+            };
+            settings = angular.extend(settings, dop);
+            $http(settings).success(function (data, status) {
+                    if (!this.userControll) {
                         this.prepareResult(data);
                     } else {
-                        this.trigger("userDataScrollControl", data);
+                        this.trigger("userDataScrollControl", data, status);
                     }
                     scope.showLoader = false;
                     offset += this.limit;
-                    this.trigger("afterScroll", this, data, status, accept);
+                    this.trigger("afterScroll", data, status);
                 }.bind(this)).error(function (data, status) {
                 this.trigger("scrollError", data, status);
             });
