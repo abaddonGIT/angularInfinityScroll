@@ -35,7 +35,7 @@ angularInfinityScroll
             </li>
             <li>
                 <b>userControll</b> - если стоит true, то пользователь сам будет управлять выводом через событие <b>userDataScrollControl</b>, в котором доступен результат запроса
-            <li>
+            </li>
             <li>
                 <b>locScope</b> - текущий scope
             </li>

@@ -13,7 +13,7 @@ app.controller("baseController", ['$scope', '$infScroll','$http','$rootScope', f
             heightWatch: 500,
             userControll: false,
             locScope: $scope,
-            method: 'get'
+            method: 'post'
         });
 
         //$scope.scrollStart = true;
