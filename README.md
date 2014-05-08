@@ -70,7 +70,7 @@ angularInfinityScroll
         <ul>
             <li>
                 <b>init</b> - инициализирует модуль
-                <pre>scroll.init({Тут натсройка модуля});</pre>
+                <pre>scroll.init({Тут настройка модуля});</pre>
             </li>
             <li>
                 <b>reset</b> - сбрасывает текущее положение прокрутки
