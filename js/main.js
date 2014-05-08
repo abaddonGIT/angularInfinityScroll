@@ -11,6 +11,7 @@ app.controller("baseController", ['$scope', '$infScroll','$http','$rootScope', f
             gifPath: "../loading.gif",
             alias: "items",
             heightWatch: 500,
+            userControl: true,
             locScope: $scope
         });
 
@@ -40,6 +41,10 @@ app.controller("baseController", ['$scope', '$infScroll','$http','$rootScope', f
 
         scroll.bind("beforeScroll", function (e, ob) {
             //console.log(ob);
+        });
+
+        scroll.bind("userDataScrollControl", function (e, ob) {
+            console.log("asasfasf");
         });
 
         scroll.bind("afterScroll", function (e, ob, data, status, accept){

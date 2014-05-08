@@ -107,7 +107,7 @@ scroll.factory("$infScroll", ['$rootScope', '$window', '$document', '$http', '$c
         limit = this.limit;
         //Инициализация скролла
         this.scope.$on("start:scroll", function (e, scope, elem) {
-            console.log("dwa");
+
             //this.locScope = scope;
             this.elem = elem;
             this.locScope[this.alias] = [];
@@ -133,7 +133,7 @@ scroll.factory("$infScroll", ['$rootScope', '$window', '$document', '$http', '$c
             scope.gifPath = this.gifPath;
         }.bind(this));
 
-        this.flag = 'startScroll_' + timestamp;
+        this.flag = 'startScroll_' + this.timestamp;
         this.locScope[this.flag] = true;
     };
 
