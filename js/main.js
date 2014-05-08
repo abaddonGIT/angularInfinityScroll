@@ -2,8 +2,6 @@ var app = angular.module('app', ['infScroll']);
 
 
 app.controller("baseController", ['$scope', '$infScroll','$http','$rootScope', function($scope, $infScroll, $http, $rootScope) {
-    $http({method: 'post',url:"http://totpp.demosite.pro/slu/test.html",headers: {'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8'}}).success(function (data) {
-
         //Инициализация скрола
         var scroll = $infScroll.init({
             url: "http://totpp.demosite.pro/slu/test.html",
@@ -23,11 +21,9 @@ app.controller("baseController", ['$scope', '$infScroll','$http','$rootScope', f
                 test: "new datas!"
             };
         };
-
         $scope.getMore = function () {
             scroll.getTheData();
         };
-
         $scope.resetScroll = function () {
             scroll.reset();
         }
@@ -58,5 +54,4 @@ app.controller("baseController", ['$scope', '$infScroll','$http','$rootScope', f
         scroll.bind("prev:deadline", function () {
             console.log("small");
         });
-    });
 }]);

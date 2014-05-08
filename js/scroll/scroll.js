@@ -97,7 +97,7 @@ scroll.factory("$infScroll", ['$rootScope', '$window', '$document', '$http', '$c
             method: "post",
             headers: null,
             alias: 'results',
-            responseType: "json",
+            responseType: "html",
             heightWatch: null,
             accept: true,
             userControll: false,
@@ -256,10 +256,14 @@ scroll.factory("$infScroll", ['$rootScope', '$window', '$document', '$http', '$c
                     }
                     break;
                 case 'html':
-                    var content = angular.element('<div></div>').append(data).contents();
+                    var content = angular.element('<div></div>').append(data).contents(), ln = content.length;
                     this.elem.append(content)
                     $compile(content)(this.locScope);
-                    this.accept = true;
+                    if (ln < this.limit) {
+                        this.accept = false;
+                    } else {
+                        this.accept = true;
+                    }
                     break;
                 }
         },
