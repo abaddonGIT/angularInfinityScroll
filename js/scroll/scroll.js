@@ -9,11 +9,16 @@ var scroll = angular.module("infScroll", []);
 /*
  * Инициализация прокрутки
  */
-scroll.directive("scrollInit", [function ($infScroll) {
+scroll.directive("scrollInit", ["$infScroll","$rootScope", function ($infScroll, $rootScope) {
     return {
         link: function (scope, elem, attr) {
+            var timestamp = $infScroll.timestamp;
             //Запускаем
-            scope.$emit("start:scroll", scope, elem);
+            scope.$watch("startScroll_" + timestamp, function (value) {
+                if (value) {
+                    $rootScope.$emit("start:scroll", scope, elem);
+                }
+            });
         }
     };
 }]);
@@ -70,7 +75,8 @@ scroll.factory("$infScroll", ['$rootScope', '$window', '$document', '$http', '$c
         offset = 0,
         accept = true,
         dH = 0,
-        wH = 0;
+        wH = 0,
+        timestamp = Date.now();
 
     var Scroll = function (options) {
         if (!(this instanceof Scroll)) {
@@ -87,20 +93,22 @@ scroll.factory("$infScroll", ['$rootScope', '$window', '$document', '$http', '$c
             limit: 5,
             offset: 0,
             scope: $rootScope,
-            timestamp: Date.now(),
+            timestamp: timestamp,
             method: "post",
             headers: null,
             alias: 'results',
             responseType: "json",
             heightWatch: null,
             accept: true,
-            userControl: false
+            userControl: false,
+            locScope: null
         }, options);
 
         limit = this.limit;
         //Инициализация скролла
         this.scope.$on("start:scroll", function (e, scope, elem) {
-            this.locScope = scope;
+            console.log("dwa");
+            //this.locScope = scope;
             this.elem = elem;
             this.locScope[this.alias] = [];
 
@@ -124,6 +132,9 @@ scroll.factory("$infScroll", ['$rootScope', '$window', '$document', '$http', '$c
         this.scope.$on("loading:scroll", function (e, scope) {
             scope.gifPath = this.gifPath;
         }.bind(this));
+
+        this.flag = 'startScroll_' + timestamp;
+        this.locScope[this.flag] = true;
     };
 
     Scroll.prototype = {
@@ -305,6 +316,7 @@ scroll.factory("$infScroll", ['$rootScope', '$window', '$document', '$http', '$c
         },
         scroll: accept,
         reset: this.reset,
-        getTheData: this.getTheData
+        getTheData: this.getTheData,
+        timestamp: timestamp
     }
 }]);
