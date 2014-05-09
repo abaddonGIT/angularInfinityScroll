@@ -14,6 +14,8 @@ app.controller("baseController", ['$scope', '$infScroll','$http','$rootScope', f
             method: 'post'
         });
 
+        console.log(scroll);
+
         //$scope.scrollStart = true;
 
         $scope.changeData = function () {

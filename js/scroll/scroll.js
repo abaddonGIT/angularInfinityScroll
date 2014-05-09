@@ -333,9 +333,6 @@ scroll.factory("$infScroll", ['$rootScope', '$window', '$document', '$http', '$c
         init: function (options) {
             return Scroll(options);
         },
-        scroll: accept,
-        reset: this.reset,
-        getTheData: this.getTheData,
         timestamp: timestamp
     }
 }]);
