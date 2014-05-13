@@ -288,7 +288,9 @@ scroll.factory("$infScroll", ['$rootScope', '$window', '$document', '$http', '$c
                 var searchString = $location.search(), searchStringKeys = Object.keys(searchString);
                 if (searchStringKeys.length) {
                     angular.forEach(searchString, function (v, k) {
-                        this.data[k] = v;
+                        if(!this.data[k]) {
+                            this.data[k] = v;
+                        }
                     }.bind(this));
                 }
             }
