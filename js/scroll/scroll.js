@@ -13,10 +13,12 @@ scroll.directive("scrollInit", ["$infScroll","$rootScope", function ($infScroll,
     return {
         link: function (scope, elem, attr) {
             var timestamp = $infScroll.timestamp;
+
             //Запускаем
-            scope.$watch("startScroll_" + timestamp, function (value) {
+            var stop = scope.$watch("startScroll", function (value) {
                 if (value) {
-                    $rootScope.$emit("start:scroll", scope, elem);
+                    value.run(scope, elem);
+                    stop();
                 }
             });
         }
@@ -61,7 +63,7 @@ scroll.filter("html", ['$sce', function ($sce) {
     };
 }]);
 /*
-* Кэширование шаблона
+ * Кэширование шаблона
  */
 scroll.factory("tempCache", ['$cacheFactory', function ($cacheFactory) {
     return $cacheFactory("tempCache", {});
@@ -70,18 +72,18 @@ scroll.factory("tempCache", ['$cacheFactory', function ($cacheFactory) {
  * Конструктор нашей функции
  */
 scroll.factory("$infScroll", ['$rootScope', '$window', '$document', '$http', '$compile', 'tempCache', '$location', function ($rootScope, $window, $document, $http, $compile, tempCache, $location) {
-    var W = angular.element($window),
-        scrollTop = 0,
-        offset = 0,
-        accept = true,
-        dH = 0,
-        wH = 0,
-        timestamp = Date.now();
+    var W = angular.element($window), scrollTop, offset, accept, dH, wH;
 
     var Scroll = function (options) {
         if (!(this instanceof Scroll)) {
             return new Scroll(options);
         }
+        //Сброс значений на дефолт
+        scrollTop = 0;
+        offset = 0;
+        accept = true; dH = 0;
+        wH = 0;
+
         //Настройки
         angular.extend(this, {
             external: true,
@@ -93,23 +95,23 @@ scroll.factory("$infScroll", ['$rootScope', '$window', '$document', '$http', '$c
             limit: 5,
             offset: 0,
             scope: $rootScope,
-            timestamp: timestamp,
+            timestamp: Date.now(),
             method: "post",
             headers: null,
             alias: 'results',
-            responseType: "html",
+            responseType: "json",
             heightWatch: null,
             accept: true,
             userControll: false,
             locScope: null,
-            pushState: true
+            pushState: false
         }, options);
 
         limit = this.limit;
-        //Инициализация скролла
-        this.scope.$on("start:scroll", function (e, scope, elem) {
-
-            //this.locScope = scope;
+        //Запуск скролла
+        this.run = function (scope, elem) {
+            if (!this.locScope) this.locScope = scope;
+            console.log("start");
             this.elem = elem;
             this.locScope[this.alias] = [];
 
@@ -128,14 +130,14 @@ scroll.factory("$infScroll", ['$rootScope', '$window', '$document', '$http', '$c
                     }
                 }.bind(this));
             }
-        }.bind(this));
+        };
         //Прелодер
         this.scope.$on("loading:scroll", function (e, scope) {
             scope.gifPath = this.gifPath;
         }.bind(this));
 
-        this.flag = 'startScroll_' + this.timestamp;
-        this.locScope[this.flag] = true;
+        this.flag = 'startScroll';
+        this.locScope[this.flag] = this;
     };
 
     Scroll.prototype = {
@@ -266,7 +268,7 @@ scroll.factory("$infScroll", ['$rootScope', '$window', '$document', '$http', '$c
                         this.accept = true;
                     }
                     break;
-                }
+            }
         },
         /*
          * Делает запрос на получение очередной порции данных
@@ -362,7 +364,6 @@ scroll.factory("$infScroll", ['$rootScope', '$window', '$document', '$http', '$c
     return {
         init: function (options) {
             return Scroll(options);
-        },
-        timestamp: timestamp
+        }
     }
 }]);
