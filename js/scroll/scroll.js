@@ -69,7 +69,7 @@ scroll.factory("tempCache", ['$cacheFactory', function ($cacheFactory) {
 /*
  * Конструктор нашей функции
  */
-scroll.factory("$infScroll", ['$rootScope', '$window', '$document', '$http', '$compile', 'tempCache', function ($rootScope, $window, $document, $http, $compile, tempCache) {
+scroll.factory("$infScroll", ['$rootScope', '$window', '$document', '$http', '$compile', 'tempCache', '$location', function ($rootScope, $window, $document, $http, $compile, tempCache, $location) {
     var W = angular.element($window),
         scrollTop = 0,
         offset = 0,
@@ -101,7 +101,8 @@ scroll.factory("$infScroll", ['$rootScope', '$window', '$document', '$http', '$c
             heightWatch: null,
             accept: true,
             userControll: false,
-            locScope: null
+            locScope: null,
+            pushState: true
         }, options);
 
         limit = this.limit;
@@ -173,7 +174,7 @@ scroll.factory("$infScroll", ['$rootScope', '$window', '$document', '$http', '$c
                 var ln = data.length;
                 do {
                     value = data[i];
-                    if (typeof(value) === "string") {
+                    if (typeof(value) === "string" || typeof(value) === "number") {
                         requestString.push('param_' + prefix + '=' + encodeURIComponent(value));
                     } else {
                         requestString.push(this.toParam(value, prefix));
@@ -184,7 +185,7 @@ scroll.factory("$infScroll", ['$rootScope', '$window', '$document', '$http', '$c
             } else {//если объект
                 for (var j in data) {
                     value = data[j];
-                    if (typeof(value) === "string") {
+                    if (typeof(value) === "string" || typeof(value) === "number") {
                         requestString.push(j + '=' + encodeURIComponent(value));
                     } else {
                         requestString.push(this.toParam(value, prefix));
@@ -282,12 +283,24 @@ scroll.factory("$infScroll", ['$rootScope', '$window', '$document', '$http', '$c
             //Показываем preloder
             scope.showLoader = true;
             this.trigger("beforeScroll");
+            //Берет данные из адресной строки и цепляет его к запросу
+            if (this.pushState) {
+                var searchString = $location.search(), searchStringKeys = Object.keys(searchString);
+                if (searchStringKeys.length) {
+                    angular.forEach(searchString, function (v, k) {
+                        this.data[k] = v;
+                    }.bind(this));
+                }
+            }
+
             switch (method) {
                 case 'POST':
+                    this.data.limit = limit;
+                    this.data.offset = offset;
                     dop = {
                         data: this.data,
                         transformRequest: function (data) {
-                            return 'limit=' + limit + '&offset=' + offset + '&' + this.toParam(data);
+                            return this.toParam(data);
                         }.bind(this)
                     };
                     break;
@@ -309,6 +322,16 @@ scroll.factory("$infScroll", ['$rootScope', '$window', '$document', '$http', '$c
                     scope.showLoader = false;
                     offset += this.limit;
                     this.trigger("afterScroll", data, status);
+                    //Нужно ли изменять url
+                    if (this.pushState) {
+                        //Перед изменением url
+                        this.trigger("beforePushState", data, status);
+                        var searchString = $location.search();
+                        angular.forEach(this.data, function (v, k) {
+                            searchString[k] = v;
+                        });
+                        $location.search(searchString);
+                    }
                 }.bind(this)).error(function (data, status) {
                 this.trigger("scrollError", data, status);
             });
@@ -323,6 +346,11 @@ scroll.factory("$infScroll", ['$rootScope', '$window', '$document', '$http', '$c
                     break;
             }
             offset = 0;
+
+            if (!this.pushState) {
+                $location.search({});
+            }
+
             this.getTheData();
         },
         //Дополнительные данные для запроса

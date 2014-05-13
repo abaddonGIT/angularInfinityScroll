@@ -11,10 +11,11 @@ app.controller("baseController", ['$scope', '$infScroll','$http','$rootScope', f
             heightWatch: 500,
             userControll: false,
             locScope: $scope,
-            method: 'post'
+            method: 'post',
+            pushState: false
         });
 
-        console.log(scroll);
+        //console.log(scroll);
 
         //$scope.scrollStart = true;
 
@@ -32,7 +33,8 @@ app.controller("baseController", ['$scope', '$infScroll','$http','$rootScope', f
 
         scroll.data = {
             test: "Hello Mickle!",
-            test2: "like"
+            test2: "like",
+            name: "Миня"
         };
 
 
