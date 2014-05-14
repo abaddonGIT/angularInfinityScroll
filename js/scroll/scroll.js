@@ -365,5 +365,5 @@ scroll.factory("$infScroll", ['$rootScope', '$window', '$document', '$http', '$c
         init: function (options) {
             return Scroll(options);
         }
-    }
+    };
 }]);
