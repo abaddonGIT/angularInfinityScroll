@@ -240,10 +240,10 @@ scroll.factory("$infScroll", ['$rootScope', '$window', '$document', '$http', '$c
                 case 'json':
                     if (data instanceof Array) {
                         var ln = data.length, i = 0;
-                        do {
+                        while (i < ln) {
                             this.locScope[this.alias].push(data[i]);
                             i++;
-                        } while (i < ln);
+                        }
                         if (ln < this.limit) {
                             this.accept = false;
                         } else {
