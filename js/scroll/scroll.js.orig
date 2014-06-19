@@ -359,5 +359,10 @@ scroll.factory("$infScroll", ['$rootScope', '$window', '$document', '$http', '$c
         init: function (options) {
             return Scroll(options);
         }
-    };
+<<<<<<< HEAD
+    }
 } ]);
+=======
+    };
+}]);
+>>>>>>> ab27ae5792a1153cbe0b9405f3a4e5042237dc77
