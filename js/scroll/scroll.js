@@ -168,16 +168,15 @@ scroll.factory("$infScroll", ['$rootScope', '$window', '$document', '$http', '$c
             var requestString = [], value = null, i = 0, prefix = prefix || 0;
             if (angular.isArray(data)) {//если массив
                 var ln = data.length;
-                do {
-                    value = data[i];
+                while (ln--) {
+                    value = data[ln];
                     if (typeof (value) === "string" || typeof (value) === "number") {
                         requestString.push('param_' + prefix + '=' + encodeURIComponent(value));
                     } else {
                         requestString.push(this.toParam(value, prefix));
                     }
-                    i++;
                     prefix++;
-                } while (i < ln);
+                }
             } else {//если объект
                 for (var j in data) {
                     value = data[j];
