@@ -1,15 +1,15 @@
 /**
- * Created by netBeans.
- * User: abaddon
- * Date: 12.04.14
- * Time: 13:10
- * Description: Бесконечный скролл
- */
+* Created by netBeans.
+* User: abaddon
+* Date: 12.04.14
+* Time: 13:10
+* Description: Бесконечный скролл
+*/
 var scroll = angular.module("infScroll", []);
 /*
- * Инициализация прокрутки
- */
-scroll.directive("scrollInit", ["$infScroll","$rootScope", function ($infScroll, $rootScope) {
+* Инициализация прокрутки
+*/
+scroll.directive("scrollInit", ["$infScroll", "$rootScope", function ($infScroll, $rootScope) {
     return {
         link: function (scope, elem, attr) {
             var timestamp = $infScroll.timestamp;
@@ -23,10 +23,10 @@ scroll.directive("scrollInit", ["$infScroll","$rootScope", function ($infScroll,
             });
         }
     };
-}]);
+} ]);
 /*
- * Показывает preloder
- */
+* Показывает preloder
+*/
 scroll.directive("scrollLoader", [function () {
     return {
         replace: true,
@@ -35,10 +35,10 @@ scroll.directive("scrollLoader", [function () {
             scope.$emit("loading:scroll", scope);
         }
     };
-}]);
+} ]);
 /*
- * Интерпритирует теги и выражение angular-ра
- */
+* Интерпритирует теги и выражение angular-ра
+*/
 scroll.directive("scrollParse", ['$sce', '$compile', function ($sce, $compile) {
     var content = null;
     return {
@@ -55,23 +55,25 @@ scroll.directive("scrollParse", ['$sce', '$compile', function ($sce, $compile) {
             };
         }
     };
-}]);
+} ]);
 //интерпритирует html- теги
 scroll.filter("html", ['$sce', function ($sce) {
     return function (input) {
         return $sce.trustAsHtml(input);
     };
-}]);
+} ]);
 /*
- * Кэширование шаблона
- */
-scroll.factory("tempCache", ['$cacheFactory', function ($cacheFactory) {
-    return $cacheFactory("tempCache", {});
-}]);
-/*
- * Конструктор нашей функции
- */
-scroll.factory("$infScroll", ['$rootScope', '$window', '$document', '$http', '$compile', 'tempCache', '$location', function ($rootScope, $window, $document, $http, $compile, tempCache, $location) {
+* Конструктор нашей функции
+*/
+scroll.factory("$infScroll", ['$rootScope', '$window', '$document', '$http', '$compile', '$location', '$templateCache', function (
+    $rootScope,
+    $window,
+    $document,
+    $http,
+    $compile,
+    $location,
+    $templateCache
+    ) {
     var W = angular.element($window), scrollTop, offset, accept, dH, wH;
 
     var Scroll = function (options) {
@@ -111,7 +113,6 @@ scroll.factory("$infScroll", ['$rootScope', '$window', '$document', '$http', '$c
         //Запуск скролла
         this.run = function (scope, elem) {
             if (!this.locScope) this.locScope = scope;
-            console.log("start");
             this.elem = elem;
             this.locScope[this.alias] = [];
 
@@ -128,13 +129,13 @@ scroll.factory("$infScroll", ['$rootScope', '$window', '$document', '$http', '$c
                     } else {
                         this.getTheData();
                     }
-                }.bind(this));
+                } .bind(this));
             }
         };
         //Прелодер
         this.scope.$on("loading:scroll", function (e, scope) {
             scope.gifPath = this.gifPath;
-        }.bind(this));
+        } .bind(this));
 
         this.flag = 'startScroll';
         this.locScope[this.flag] = this;
@@ -150,24 +151,17 @@ scroll.factory("$infScroll", ['$rootScope', '$window', '$document', '$http', '$c
             this.scope.$broadcast.apply(this.scope, arguments);
         },
         /*
-         * Подгружает шаблон
-         */
+        * Подгружает шаблон
+        */
         loadTemplate: function (callback) {
-            var temp = tempCache.get(this.template), content = null;
-            if (!temp) {
-                $http.post(this.template).success(function (template, status) {
-                        this.elem.append(template);
-                        content = this.elem.contents();
-                        $compile(content)(this.locScope);
-                        tempCache.put(this.template, content);
-                        callback();
-                    }.bind(this)).error(function (data, status) {
-                    this.trigger("scrollError", data, status);
-                });
-            } else {
-                $compile(temp)(this.locScope);
+            $http({ method: 'get', cache: $templateCache, url: this.template }).success(function (template, status) {
+                this.elem.append(template);
+                content = this.elem.contents();
+                $compile(content)(this.locScope);
                 callback();
-            }
+            } .bind(this)).error(function (data, status) {
+                this.trigger("scrollError", data, status);
+            });
         },
         //Преобразует объект, массив или массив объектов в строку для запроса
         toParam: function (data, prefix) {
@@ -176,7 +170,7 @@ scroll.factory("$infScroll", ['$rootScope', '$window', '$document', '$http', '$c
                 var ln = data.length;
                 do {
                     value = data[i];
-                    if (typeof(value) === "string" || typeof(value) === "number") {
+                    if (typeof (value) === "string" || typeof (value) === "number") {
                         requestString.push('param_' + prefix + '=' + encodeURIComponent(value));
                     } else {
                         requestString.push(this.toParam(value, prefix));
@@ -187,7 +181,7 @@ scroll.factory("$infScroll", ['$rootScope', '$window', '$document', '$http', '$c
             } else {//если объект
                 for (var j in data) {
                     value = data[j];
-                    if (typeof(value) === "string" || typeof(value) === "number") {
+                    if (typeof (value) === "string" || typeof (value) === "number") {
                         requestString.push(j + '=' + encodeURIComponent(value));
                     } else {
                         requestString.push(this.toParam(value, prefix));
@@ -211,7 +205,7 @@ scroll.factory("$infScroll", ['$rootScope', '$window', '$document', '$http', '$c
             win.unbind('scroll');
             win.bind('scroll', function (e) {
                 scrollTop = win[0].pageYOffset || doc.scrollTop;
-                wH = Math.max(doc.scrollHeight, dH);//Длина с учетом подгруженных элементов
+                wH = Math.max(doc.scrollHeight, dH); //Длина с учетом подгруженных элементов
 
                 if (scrollTop + this.indentToScroll >= wH - dH && this.accept) {
                     //Новая порция
@@ -232,7 +226,7 @@ scroll.factory("$infScroll", ['$rootScope', '$window', '$document', '$http', '$c
                     }
                 }
 
-            }.bind(this));
+            } .bind(this));
             this.getTheData();
         },
         prepareResult: function (data) {
@@ -271,15 +265,15 @@ scroll.factory("$infScroll", ['$rootScope', '$window', '$document', '$http', '$c
             }
         },
         /*
-         * Делает запрос на получение очередной порции данных
-         */
+        * Делает запрос на получение очередной порции данных
+        */
         getTheData: function () {
             this.accept = false;
             var scope = this.locScope, method = this.method.toUpperCase(),
                 settings = {
                     method: this.method,
                     url: this.url,
-                    headers: this.headers || {'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8'},
+                    headers: this.headers || { 'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8' },
                     responseType: this.responseType
                 }, dop = {};
             //Показываем preloder
@@ -290,10 +284,10 @@ scroll.factory("$infScroll", ['$rootScope', '$window', '$document', '$http', '$c
                 var searchString = $location.search(), searchStringKeys = Object.keys(searchString);
                 if (searchStringKeys.length) {
                     angular.forEach(searchString, function (v, k) {
-                        if(!this.data[k]) {
+                        if (!this.data[k]) {
                             this.data[k] = v;
                         }
-                    }.bind(this));
+                    } .bind(this));
                 }
             }
 
@@ -305,7 +299,7 @@ scroll.factory("$infScroll", ['$rootScope', '$window', '$document', '$http', '$c
                         data: this.data,
                         transformRequest: function (data) {
                             return this.toParam(data);
-                        }.bind(this)
+                        } .bind(this)
                     };
                     break;
                 case 'GET':
@@ -318,25 +312,25 @@ scroll.factory("$infScroll", ['$rootScope', '$window', '$document', '$http', '$c
             };
             settings = angular.extend(settings, dop);
             $http(settings).success(function (data, status) {
-                    if (!this.userControll) {
-                        this.prepareResult(data);
-                    } else {
-                        this.trigger("userDataScrollControl", data, status);
-                    }
-                    scope.showLoader = false;
-                    offset += this.limit;
-                    this.trigger("afterScroll", data, status);
-                    //Нужно ли изменять url
-                    if (this.pushState) {
-                        //Перед изменением url
-                        this.trigger("beforePushState", data, status);
-                        var searchString = $location.search();
-                        angular.forEach(this.data, function (v, k) {
-                            searchString[k] = v;
-                        });
-                        $location.search(searchString);
-                    }
-                }.bind(this)).error(function (data, status) {
+                if (!this.userControll) {
+                    this.prepareResult(data);
+                } else {
+                    this.trigger("userDataScrollControl", data, status);
+                }
+                scope.showLoader = false;
+                offset += this.limit;
+                this.trigger("afterScroll", data, status);
+                //Нужно ли изменять url
+                if (this.pushState) {
+                    //Перед изменением url
+                    this.trigger("beforePushState", data, status);
+                    var searchString = $location.search();
+                    angular.forEach(this.data, function (v, k) {
+                        searchString[k] = v;
+                    });
+                    $location.search(searchString);
+                }
+            } .bind(this)).error(function (data, status) {
                 this.trigger("scrollError", data, status);
             });
         },
@@ -366,4 +360,4 @@ scroll.factory("$infScroll", ['$rootScope', '$window', '$document', '$http', '$c
             return Scroll(options);
         }
     }
-}]);
+} ]);
