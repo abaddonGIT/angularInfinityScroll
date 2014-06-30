@@ -111,7 +111,6 @@ scroll.factory("$infScroll", ['$rootScope', '$window', '$document', '$http', '$c
         //Запуск скролла
         this.run = function (scope, elem) {
             if (!this.locScope) this.locScope = scope;
-            console.log("start");
             this.elem = elem;
             this.locScope[this.alias] = [];
 
@@ -174,23 +173,22 @@ scroll.factory("$infScroll", ['$rootScope', '$window', '$document', '$http', '$c
             var requestString = [], value = null, i = 0, prefix = prefix || 0;
             if (angular.isArray(data)) {//если массив
                 var ln = data.length;
-                do {
-                    value = data[i];
-                    if (typeof(value) === "string" || typeof(value) === "number") {
-                        requestString.push('param_' + prefix + '=' + encodeURIComponent(value));
-                    } else {
+                while (ln--) {
+                    value = data[ln];
+                    if (angular.isObject(value)) {
                         requestString.push(this.toParam(value, prefix));
+                    } else {
+                        requestString.push('param_' + prefix + '=' + encodeURIComponent(value));
                     }
-                    i++;
                     prefix++;
-                } while (i < ln);
+                }
             } else {//если объект
                 for (var j in data) {
                     value = data[j];
-                    if (typeof(value) === "string" || typeof(value) === "number") {
-                        requestString.push(j + '=' + encodeURIComponent(value));
-                    } else {
+                    if (angular.isObject(value)) {
                         requestString.push(this.toParam(value, prefix));
+                    } else {
+                        requestString.push(j + '=' + encodeURIComponent(value));
                     }
                     i++;
                 }
