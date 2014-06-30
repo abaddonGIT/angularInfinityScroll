@@ -168,23 +168,34 @@ scroll.factory("$infScroll", ['$rootScope', '$window', '$document', '$http', '$c
             var requestString = [], value = null, i = 0, prefix = prefix || 0;
             if (angular.isArray(data)) {//если массив
                 var ln = data.length;
-                do {
-                    value = data[i];
+                while (ln--) {
+                    value = data[ln];
+<<<<<<< HEAD
+                    if (angular.isObject(value)) {
+=======
                     if (typeof (value) === "string" || typeof (value) === "number") {
                         requestString.push('param_' + prefix + '=' + encodeURIComponent(value));
                     } else {
+>>>>>>> 696096270fe85fdc62b3a3f0111a42349ff5b82a
                         requestString.push(this.toParam(value, prefix));
+                    } else {
+                        requestString.push('param_' + prefix + '=' + encodeURIComponent(value));
                     }
-                    i++;
                     prefix++;
-                } while (i < ln);
+                }
             } else {//если объект
                 for (var j in data) {
                     value = data[j];
+<<<<<<< HEAD
+                    if (angular.isObject(value)) {
+=======
                     if (typeof (value) === "string" || typeof (value) === "number") {
                         requestString.push(j + '=' + encodeURIComponent(value));
                     } else {
+>>>>>>> 696096270fe85fdc62b3a3f0111a42349ff5b82a
                         requestString.push(this.toParam(value, prefix));
+                    } else {
+                        requestString.push(j + '=' + encodeURIComponent(value));
                     }
                     i++;
                 }
@@ -359,10 +370,5 @@ scroll.factory("$infScroll", ['$rootScope', '$window', '$document', '$http', '$c
         init: function (options) {
             return Scroll(options);
         }
-<<<<<<< HEAD
-    }
-} ]);
-=======
     };
-}]);
->>>>>>> ab27ae5792a1153cbe0b9405f3a4e5042237dc77
+} ]);
